@@ -21,9 +21,7 @@ RUN apt-get install -y git
 COPY . /app
 WORKDIR /app
 
-
-
-
 RUN pip3 install --upgrade pip && \
     pip3 install -r requirements.txt && \
-    pip3 install notebook
+    pip3 install notebook && \
+    pip install ipywidgets --upgrade
