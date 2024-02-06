@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from tqdm import tqdm
+import zipfile
 
 def is_valid_file_or_dir(href):
     # Basic check to exclude non-file and non-directory patterns
@@ -64,6 +65,24 @@ def download_files_from_directory(url, target_folder):
         else:
             download_file_with_progress(file_url, local_path)
 
+
+
+def unpack_zip(zip_path, extract_to):
+    """
+    Unpacks a zip file to the specified directory, preserving its file structure.
+
+    :param zip_path: The path to the zip file.
+    :param extract_to: The directory where the zip contents will be extracted.
+    """
+    # Ensure the target directory exists
+    if not os.path.exists(extract_to):
+        os.makedirs(extract_to)
+    
+    # Open the zip file
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        # Extract all the contents into the directory
+        zip_ref.extractall(extract_to)
+        print(f"Extracted {zip_path} to {extract_to}")
 
 # # Example usage
 # url = 'https://data.ciirc.cvut.cz/public/projects/2020VisualLocalization/Aachen-Day-Night/'
