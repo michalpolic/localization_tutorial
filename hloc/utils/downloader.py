@@ -1,24 +1,43 @@
 import os
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from tqdm import tqdm
 
-def download_file_with_progress(url, filename):
-    # Stream the download to monitor its progress
-    response = requests.get(url, stream=True)
-    total_size_in_bytes = int(response.headers.get('content-length', 0))
-    block_size = 1024  # 1 Kibibyte
+def is_valid_file_or_dir(href):
+    # Basic check to exclude non-file and non-directory patterns
+    return href and ('/' in href or '.' in href)
 
-    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
-    with open(filename, 'wb') as file:
-        for data in response.iter_content(block_size):
-            progress_bar.update(len(data))
-            file.write(data)
-    progress_bar.close()
-    
-    if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-        print("ERROR, something went wrong")
+def get_local_path_for_href(base_local_path, href):
+    # Normalize and construct a safe local path for the href
+    # This removes any '../' and ensures the path stays within the target directory
+    normalized_href = os.path.normpath(href).strip('/')
+    return os.path.join(base_local_path, normalized_href)
+
+
+
+def download_file_with_progress(url, filename):
+    response = requests.head(url)
+    total_size_in_bytes = int(response.headers.get('content-length', 0))
+
+    if os.path.exists(filename):
+        existing_file_size = os.path.getsize(filename)
+        if existing_file_size == total_size_in_bytes:
+            print(f"File already exists and is complete: {filename}")
+            return
+
+    print(f"Downloading: {filename}")
+    response = requests.get(url, stream=True)
+    with open(filename, 'wb') as file, tqdm(
+        desc=filename,
+        total=total_size_in_bytes,
+        unit='iB',
+        unit_scale=True,
+        unit_divisor=1024,
+    ) as bar:
+        for data in response.iter_content(chunk_size=1024):
+            size = file.write(data)
+            bar.update(size)
 
 def download_files_from_directory(url, target_folder):
     if not os.path.exists(target_folder):
@@ -27,11 +46,26 @@ def download_files_from_directory(url, target_folder):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
 
+    # Filter out the parent directory link explicitly
     for link in soup.find_all('a'):
-        file_url = urljoin(url, link.get('href'))
-        
-        if not file_url.endswith('/'):  # Assuming it's a file if the URL doesn't end with '/'
-            filename = os.path.join(target_folder, file_url.split('/')[-1])
-            print(f'Downloading {filename}')
-            download_file_with_progress(file_url, filename)
+        href = link.get('href')
+        if not href or 'Parent Directory' in link.text or '?' in href:
+            continue  # Skip the parent directory link, sorting links, and any other non-relevant links
 
+        file_url = urljoin(url, href)
+        local_path = os.path.join(target_folder, href.strip('/'))
+
+        # Check if it's likely a directory (ends with a slash)
+        if href.endswith('/'):
+            next_directory = os.path.join(target_folder, href.strip('/'))
+            if not os.path.exists(next_directory):
+                os.makedirs(next_directory)
+            download_files_from_directory(file_url, next_directory)
+        else:
+            download_file_with_progress(file_url, local_path)
+
+
+# # Example usage
+# url = 'https://data.ciirc.cvut.cz/public/projects/2020VisualLocalization/Aachen-Day-Night/'
+# target_folder = '/data/aachen/'
+# download_files_from_directory(url, target_folder)
