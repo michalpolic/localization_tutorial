@@ -124,6 +124,19 @@ def main(
     sfm_dir.mkdir(parents=True, exist_ok=True)
     database = sfm_dir / "database.db"
 
+    # Check if a reconstruction already exists
+    existing_reconstruction = list(sfm_dir.glob('*.bin'))  # Assuming reconstructions are saved as .bin files
+    if existing_reconstruction:
+        user_choice = input("Reconstruction exists. Recompute (R) or Load (L)? [R/L]: ").strip().upper()
+        if user_choice == 'L':
+            # Load the existing reconstruction
+            reconstruction = pycolmap.Reconstruction(sfm_dir)
+            logger.info(f"Loaded existing reconstruction from {sfm_dir}")
+            return reconstruction
+        elif user_choice != 'R':
+            print("Invalid choice. Defaulting to Recompute.")
+
+    # Proceed with reconstruction computation if not loading an existing one
     create_empty_db(database)
     import_images(image_dir, database, camera_mode, image_list, image_options)
     image_ids = get_image_ids(database)
