@@ -27,4 +27,5 @@ RUN pip3 install --upgrade pip && \
     pip3 install ipywidgets --upgrade  && \
     cd /app  && \
     git submodule update --init --recursive && \
-    pip3 install yacs
+    pip3 install yacs &&\
+    pip3 install scikit-learn

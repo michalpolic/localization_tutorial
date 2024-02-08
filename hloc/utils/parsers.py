@@ -57,3 +57,14 @@ def names_to_pair(name0, name1, separator="/"):
 
 def names_to_pair_old(name0, name1):
     return names_to_pair(name0, name1, separator="_")
+
+def group_and_sort_image_pairs_with_labels(pairs):
+    grouped_results = defaultdict(list)
+    for query, database, score in pairs:
+        label = f"score: {score:.2f}"
+        grouped_results[query].append((database, score, label))
+    
+    for query in grouped_results:
+        grouped_results[query].sort(key=lambda x: x[1], reverse=True)  # Sort by score
+    
+    return grouped_results

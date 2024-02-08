@@ -20,7 +20,7 @@ def cm_RdGn(x):
 
 
 def plot_images(
-    imgs, titles=None, cmaps="gray", dpi=100, pad=0.5, adaptive=True, figsize=4.5
+    imgs, titles=None, cmaps="gray", dpi=100, pad=0.5, adaptive=True, figsize=4.5, title_fontsize=10
 ):
     """Plot a set of images horizontally.
     Args:
@@ -47,7 +47,7 @@ def plot_images(
         ax.imshow(img, cmap=plt.get_cmap(cmaps[i]))
         ax.set_axis_off()
         if titles:
-            ax.set_title(titles[i])
+            ax.set_title(titles[i], fontsize=title_fontsize)
     fig.tight_layout(pad=pad)
 
 

@@ -2,8 +2,11 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 import zipfile
+import shutil
+
+from .. import logger
 
 def is_valid_file_or_dir(href):
     # Basic check to exclude non-file and non-directory patterns
@@ -84,7 +87,52 @@ def unpack_zip(zip_path, extract_to):
         zip_ref.extractall(extract_to)
         print(f"Extracted {zip_path} to {extract_to}")
 
-# # Example usage
-# url = 'https://data.ciirc.cvut.cz/public/projects/2020VisualLocalization/Aachen-Day-Night/'
-# target_folder = '/data/aachen/'
-# download_files_from_directory(url, target_folder)
+
+def save_uploaded_file(uploaded_files, save_path):
+    """
+    Save uploaded files to the specified path.
+    
+    Parameters:
+    uploaded_files: dict
+        Dictionary of uploaded files from the uploader widget.
+    save_path: Path
+        Path object representing the directory to save files to.
+    """
+    for file_info in uploaded_files:
+        # Define the full path for the file to be saved
+        destination = save_path / file_info['name']
+        
+        # Write the file's content to the destination
+        with open(destination, 'wb') as f:
+            f.write(file_info['content'])
+        logger.info(f"File {file_info['name']} saved to {destination}")
+        
+
+def copy_new_images_only(source_dir, target_dir):
+    """
+    Copy images from the source directory to the target directory,
+    only if they do not already exist in the target directory, with a progress bar.
+    
+    Parameters:
+    - source_dir: The directory to copy images from.
+    - target_dir: The directory to copy images to.
+    """
+    # Ensure target directory exists
+    os.makedirs(target_dir, exist_ok=True)
+    
+    # Get a list of all image files in the source directory
+    image_files = [f for f in os.listdir(source_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
+    
+    # Initialize the progress bar
+    with tqdm(total=len(image_files), desc="Copying images") as pbar:
+        for filename in image_files:
+            source_path = os.path.join(source_dir, filename)
+            target_path = os.path.join(target_dir, filename)
+            
+            # Check if the image does not exist in the target directory
+            if not os.path.exists(target_path):
+                # Copy the image to the target directory
+                shutil.copy2(source_path, target_path)
+                
+            # Update the progress bar
+            pbar.update(1)

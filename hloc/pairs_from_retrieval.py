@@ -67,7 +67,7 @@ def pairs_from_score_matrix(
 
     pairs = []
     for i, j in zip(*np.where(valid)):
-        pairs.append((i, indices[i, j]))
+        pairs.append((i, indices[i, j], scores[i, j].cpu().item()))
     return pairs
 
 
@@ -111,11 +111,13 @@ def main(
     # Avoid self-matching
     self = np.array(query_names)[:, None] == np.array(db_names)[None]
     pairs = pairs_from_score_matrix(sim, self, num_matched, min_score=0)
-    pairs = [(query_names[i], db_names[j]) for i, j in pairs]
+    pairs = [(query_names[i], db_names[j], s) for i, j, s in pairs]
 
     logger.info(f"Found {len(pairs)} pairs.")
     with open(output, "w") as f:
-        f.write("\n".join(" ".join([i, j]) for i, j in pairs))
+        f.write("\n".join(" ".join([i, j]) for i, j, _ in pairs))
+
+    return pairs
 
 
 if __name__ == "__main__":
