@@ -24,4 +24,7 @@ WORKDIR /app
 RUN pip3 install --upgrade pip && \
     pip3 install -r requirements.txt && \
     pip3 install notebook && \
-    pip install ipywidgets --upgrade
+    pip3 install ipywidgets --upgrade  && \
+    cd /app  && \
+    git submodule update --init --recursive && \
+    pip3 install yacs

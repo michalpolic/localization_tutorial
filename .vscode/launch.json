@@ -11,7 +11,7 @@
             "program": "/app/build_dataset.py",
             "console": "integratedTerminal",
             "args":[
-                "--dataset", "/data/aachen",
+                "--dataset", "/data/aachen/images_upright/db",
                 "--outputs","/app/outputs/aachen"
             ]
         }

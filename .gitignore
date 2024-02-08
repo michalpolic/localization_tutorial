@@ -8,3 +8,5 @@ outputs/
 datasets/*
 !datasets/sacre_coeur/
 datasets/sacre_coeur/query
+
+third_party/SENet/weights/SENet_R50_con.pyth

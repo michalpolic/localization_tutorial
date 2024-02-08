@@ -135,6 +135,12 @@ confs = {
         "model": {"name": "eigenplaces"},
         "preprocessing": {"resize_max": 1024},
     },
+    "senet": {
+        "output": "global-feats-senet",
+        "model": {"name": "senet", "model_name": "SENet_R50_con", 
+                  "resnet_size": 50, "scale_list": [0.7071, 1.0, 1.4142]},
+        "preprocessing": {"resize_max": 1024},
+    },
 }
 
 

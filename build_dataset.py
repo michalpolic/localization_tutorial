@@ -5,7 +5,7 @@ import argparse
 from hloc import extract_features, match_features
 from hloc import pairs_from_covisibility, pairs_from_retrieval
 from hloc import colmap_from_nvm, triangulation, localize_sfm
-
+from hloc.utils.io import list_h5_names
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=Path, default='/data/input',
@@ -33,11 +33,13 @@ results = outputs / f'Aachen_hloc_superpoint+superglue_netvlad{args.num_loc}.txt
 # print(f'Configs for feature matchers:\n{pformat(match_features.confs)}')
 
 # pick one of the configurations for extraction and matching
-retrieval_conf = extract_features.confs['netvlad']
+retrieval_conf = extract_features.confs['senet']  # netvlad
 feature_conf = extract_features.confs['superpoint_aachen']
 matcher_conf = match_features.confs['superpoint+lightglue']
 
 # prepare the map
+global_descriptors = extract_features.main(retrieval_conf, images, outputs)
+
 features = extract_features.main(feature_conf, images, outputs)
 
 pairs_from_covisibility.main(
@@ -55,4 +57,3 @@ triangulation.main(
     sfm_matches,
     colmap_path='colmap')
 
-global_descriptors = extract_features.main(retrieval_conf, images, outputs)
