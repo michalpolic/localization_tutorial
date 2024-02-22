@@ -127,13 +127,13 @@ def main(
     # Check if a reconstruction already exists
     existing_reconstruction = list(sfm_dir.glob('*.bin'))  # Assuming reconstructions are saved as .bin files
     if existing_reconstruction:
-        user_choice = input("Reconstruction exists. Recompute (R) or Load (L)? [R/L]: ").strip().upper()
+        user_choice = input("Reconstruction exists. Recompute (E) or Load (L)? [E/L]: ").strip().upper()
         if user_choice == 'L':
             # Load the existing reconstruction
             reconstruction = pycolmap.Reconstruction(sfm_dir)
             logger.info(f"Loaded existing reconstruction from {sfm_dir}")
             return reconstruction
-        elif user_choice != 'R':
+        elif user_choice != 'E':
             print("Invalid choice. Defaulting to Recompute.")
 
     # Proceed with reconstruction computation if not loading an existing one
